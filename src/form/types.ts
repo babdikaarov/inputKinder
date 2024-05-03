@@ -62,6 +62,7 @@ export interface FormOptionsProps {
 export type TFormData = {
    formOption: string;
    inn: string;
+   url: string;
    lastName: string;
    firstName: string;
    docLength: number;

@@ -11,6 +11,21 @@ import { cn } from "./cn";
 import { useForm } from "@tanstack/react-form";
 
 export default function TSForm({ opt }: TSFormProps) {
+   async function sendData(formData: FormData, url: string) {
+      try {
+         const response = await fetch(url, {
+            method: "POST",
+            body: formData,
+         });
+         if (!response.ok) {
+            throw new Error("Failed to send data");
+         }
+         const data = await response.json();
+         console.log("Data sent successfully:", data);
+      } catch (error) {
+         console.error("Error sending data:", error);
+      }
+   }
    const [isOpen, setIsOpen] = useState(false);
    const [options, setOptions] = useState(opt);
    const [compare, setCompare] = useState(0);
@@ -18,6 +33,7 @@ export default function TSForm({ opt }: TSFormProps) {
       defaultValues: {
          formOption: "",
          inn: "",
+         url: "",
          lastName: "",
          firstName: "",
          phoneNumber: "",
@@ -30,8 +46,10 @@ export default function TSForm({ opt }: TSFormProps) {
       },
       onSubmit({ value }) {
          // console.log('submit')
-         console.log(value);
-
+         // console.log(value);
+         const url = value.url;
+         console.log("URL: " + url);
+         const formData = new FormData();
          const data: any = {};
          data.formOption = value.formOption;
          data.inn = value.inn;
@@ -39,11 +57,12 @@ export default function TSForm({ opt }: TSFormProps) {
          data.firstName = value.firstName;
          data.docs = {};
          value.docs.forEach((el) => {
-            // console.log(el);
             data.docs[el.name] = el.file;
          });
-         // console.log(data);
-         // window.alert(JSON.stringify(data, null, 2));
+         formData.append("data", data);
+         console.log("DATA: ", data);
+
+         sendData(formData, url);
       },
 
       validatorAdapter: zodValidator,
@@ -102,6 +121,24 @@ export default function TSForm({ opt }: TSFormProps) {
                            error={field.state.meta.touchedErrors}
                         />
                      </>
+                  );
+               }}
+            </form.Field>
+            <form.Field
+               name="url"
+               validators={{
+                  onChange: z.string().min(1, "Provide url"),
+               }}
+            >
+               {(field) => {
+                  return (
+                     <TextInput
+                        errorTitle={"URL needed"}
+                        name={"url"}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        error={field.state.meta.touchedErrors}
+                     />
                   );
                }}
             </form.Field>
@@ -206,11 +243,7 @@ export default function TSForm({ opt }: TSFormProps) {
                                  <div className="w-full">
                                     <form.Field name={`docs[${i}].name`}>
                                        {(subField) => {
-                                          return (
-                                             <DocNameInput
-                                                value={subField.state.value}
-                                             />
-                                          );
+                                          return <DocNameInput value={subField.state.value} />;
                                        }}
                                     </form.Field>
                                     <form.Field
@@ -292,7 +325,6 @@ export default function TSForm({ opt }: TSFormProps) {
                            text={"add file"}
                            getOption={() => form.getFieldValue("formOption")}
                            pushField={(name: string) => {
-
                               field.pushValue({ name: name, file: null });
                               setOptions((prev) => ({
                                  ...prev,

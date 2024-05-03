@@ -25,7 +25,7 @@ const FormOptions: React.FC<FormOptionsProps> = ({ changeHandler, opt, onBlur, e
                {value.name}
             </label>
          ))}
-         <Warn error={error} title={"strapi title mark field"} className="-top-[120px]" />
+         <Warn error={error} title={"strapi title mark field"} className="-top-[35px] h-4" />
       </div>
    );
 };
